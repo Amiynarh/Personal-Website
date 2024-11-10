@@ -56,7 +56,7 @@ cd portfolio
 3. Open `index.html` in your browser or use a local server:
 ```bash
 # Using Python
-python -m http.server 8000
+python -m http.server 8080
 ```
 
 4. For contact form functionality:
