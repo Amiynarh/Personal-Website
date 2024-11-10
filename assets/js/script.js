@@ -114,26 +114,145 @@ for (let i = 0; i < filterBtn.length; i++) {
 }
 
 
-
-// contact form variables
+// Updated JavaScript with Formspree integration
 const form = document.querySelector("[data-form]");
 const formInputs = document.querySelectorAll("[data-form-input]");
 const formBtn = document.querySelector("[data-form-btn]");
+const successMessage = document.querySelector('[data-form-message="success"]');
+const errorMessage = document.querySelector('[data-form-message="error"]');
 
-// add event to all form input field
-for (let i = 0; i < formInputs.length; i++) {
-  formInputs[i].addEventListener("input", function () {
+// Email validation function
+function isValidEmail(email) {
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  return emailRegex.test(email);
+}
 
-    // check form validation
+// Hide all messages
+function hideMessages() {
+  successMessage.classList.remove('show');
+  errorMessage.classList.remove('show');
+}
+
+// Show specific message
+function showMessage(type) {
+  hideMessages();
+  document.querySelector(`[data-form-message="${type}"]`).classList.add('show');
+  
+  // Hide message after 5 seconds
+  setTimeout(() => {
+    hideMessages();
+  }, 5000);
+}
+
+// Input validation
+formInputs.forEach(input => {
+  input.addEventListener("input", function() {
+    // Clear previous messages
+    hideMessages();
+
+    // Special validation for email
+    if (input.type === 'email' && input.value) {
+      if (!isValidEmail(input.value)) {
+        input.setCustomValidity('Please enter a valid email address');
+      } else {
+        input.setCustomValidity('');
+      }
+    }
+
+    // Enable/disable submit button
     if (form.checkValidity()) {
       formBtn.removeAttribute("disabled");
     } else {
       formBtn.setAttribute("disabled", "");
     }
-
   });
-}
+});
 
+// Form submission
+form.addEventListener("submit", async function(e) {
+  e.preventDefault();
+  
+  // Start loading state
+  formBtn.classList.add('loading');
+  formBtn.setAttribute("disabled", "");
+  hideMessages();
+
+  try {
+    const response = await fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      showMessage('success');
+      form.reset();
+      formBtn.setAttribute("disabled", "");
+    } else {
+      throw new Error('Submission failed');
+    }
+  } catch (error) {
+    showMessage('error');
+  } finally {
+    // End loading state
+    formBtn.classList.remove('loading');
+    if (form.checkValidity()) {
+      formBtn.removeAttribute("disabled");
+    }
+  }
+});  
+
+// add event to all form input field
+// for (let i = 0; i < formInputs.length; i++) {
+//   formInputs[i].addEventListener("input", function () {
+//     // check form validation
+//     if (form.checkValidity()) {
+//       formBtn.removeAttribute("disabled");
+//     } else {
+//       formBtn.setAttribute("disabled", "");
+//     }
+//   });
+// }
+
+// // Handle form submission
+// form.addEventListener("submit", async function (e) {
+//   e.preventDefault();
+  
+//   // Show sending state
+//   formBtn.setAttribute("disabled", "");
+//   const originalBtnText = formBtn.querySelector("span").textContent;
+//   formBtn.querySelector("span").textContent = "Sending...";
+
+//   try {
+//     const response = await fetch(form.action, {
+//       method: 'POST',
+//       body: new FormData(form),
+//       headers: {
+//         'Accept': 'application/json'
+//       }
+//     });
+
+//     if (response.ok) {
+//       // Success message
+//       form.reset();
+//       formBtn.setAttribute("disabled", "");
+//       alert("Thank you! Your message has been sent successfully.");
+//     } else {
+//       throw new Error('Form submission failed');
+//     }
+//   } catch (error) {
+//     // Error message
+//     alert("Oops! There was a problem sending your message. Please try again.");
+//   } finally {
+//     // Reset button state
+//     formBtn.querySelector("span").textContent = originalBtnText;
+//     if (form.checkValidity()) {
+//       formBtn.removeAttribute("disabled");
+//     }
+//   }
+// });
 
 
 // page navigation variables
